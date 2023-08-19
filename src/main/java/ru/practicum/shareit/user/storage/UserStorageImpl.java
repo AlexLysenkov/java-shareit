@@ -1,16 +1,14 @@
 package ru.practicum.shareit.user.storage;
 
-import lombok.Getter;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.ObjectNotFoundException;
-import ru.practicum.shareit.exception.ValidationException;
+import ru.practicum.shareit.exception.DuplicateEmailException;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.*;
 
 @Repository
 public class UserStorageImpl implements UserStorage {
-    @Getter
     private final Map<Long, User> users = new HashMap<>();
     private Long id = 1L;
 
@@ -59,11 +57,12 @@ public class UserStorageImpl implements UserStorage {
     private void checkEmail(String email) {
         Collection<User> user = users.values();
         if (user.stream().anyMatch(repUser -> repUser.getEmail().equals(email))) {
-            throw new ValidationException(String.format("Пользователь уже существует с таким email: %s", email));
+            throw new DuplicateEmailException(String.format("Пользователь уже существует с таким email: %s", email));
         }
     }
 
-    private void checkUser(Long id) {
+    @Override
+    public void checkUser(Long id) {
         if (!users.containsKey(id)) {
             throw new ObjectNotFoundException(String.format("User с id: %d не найден", id));
         }

@@ -51,4 +51,14 @@ public class UserServiceImpl implements UserService {
         log.info("Список всех Users получен");
         return UserMapper.listUsersToListDto(userStorage.getAllUsers());
     }
+
+    @Override
+    public User getOwnerById(Long ownerId) {
+        return userStorage.getUserById(ownerId);
+    }
+
+    @Override
+    public void checkUserExistsById(Long id) {
+        userStorage.checkUser(id);
+    }
 }

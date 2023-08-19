@@ -1,5 +1,6 @@
 package ru.practicum.shareit.user.mapper;
 
+import lombok.experimental.UtilityClass;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
@@ -7,8 +8,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@UtilityClass
 public class UserMapper {
-    public static UserDto userToDto(User user) {
+    public UserDto userToDto(User user) {
         if (user == null) {
             throw new IllegalArgumentException("User не может быть null");
         }
@@ -19,7 +21,7 @@ public class UserMapper {
                 .build();
     }
 
-    public static User dtoToUser(UserDto userDto) {
+    public User dtoToUser(UserDto userDto) {
         if (userDto == null) {
             throw new IllegalArgumentException("UserDto не может быть null");
         }
@@ -30,7 +32,7 @@ public class UserMapper {
                 .build();
     }
 
-    public static List<UserDto> listUsersToListDto(Collection<User> users) {
+    public List<UserDto> listUsersToListDto(Collection<User> users) {
         return users.stream().map(UserMapper::userToDto).collect(Collectors.toList());
     }
 }
