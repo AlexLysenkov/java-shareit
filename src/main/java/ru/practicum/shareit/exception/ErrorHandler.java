@@ -14,7 +14,7 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handlerValidationException(final DuplicateEmailException e) {
-        log.warn("Конфликтующий запрос 409 {}", e.getMessage());
+        log.warn("Конфликтующий запрос 409 {}", e.getMessage(), e);
         return new ErrorResponse(
                 e.getMessage()
         );
@@ -23,16 +23,16 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handlerNotFoundException(final ObjectNotFoundException e) {
-        log.warn("Объект не найден 404 {}", e.getMessage());
+        log.warn("Объект не найден 404 {}", e.getMessage(), e);
         return new ErrorResponse(
                 e.getMessage()
         );
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ExceptionHandler()
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-        log.warn("Некорректные данные от пользователя 400 {}", e.getMessage());
+        log.warn("Некорректные данные от пользователя 400 {}", e.getMessage(), e);
         return new ErrorResponse(
                 e.getMessage()
         );
@@ -41,7 +41,7 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleThrowable(final Throwable e) {
-        log.warn("Произошла непредвиденная ошибка 500 {}", e.getMessage());
+        log.warn("Произошла непредвиденная ошибка 500 {}", e.getMessage(), e);
         return new ErrorResponse(
                 e.getMessage()
         );

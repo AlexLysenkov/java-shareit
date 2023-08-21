@@ -15,5 +15,5 @@ public interface UserStorage {
 
     List<User> getAllUsers();
 
-    void checkUser(Long id);
+    boolean existsById(Long id);
 }

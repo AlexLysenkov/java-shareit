@@ -39,13 +39,13 @@ public class UserStorageImpl implements UserStorage {
 
     @Override
     public User getUserById(Long id) {
-        checkUser(id);
+//        checkUser(id);
         return users.get(id);
     }
 
     @Override
     public void deleteUserById(Long id) {
-        checkUser(id);
+//        checkUser(id);
         users.remove(id);
     }
 
@@ -62,9 +62,7 @@ public class UserStorageImpl implements UserStorage {
     }
 
     @Override
-    public void checkUser(Long id) {
-        if (!users.containsKey(id)) {
-            throw new ObjectNotFoundException(String.format("User с id: %d не найден", id));
-        }
+    public boolean existsById(Long id) {
+        return users.containsKey(id);
     }
 }

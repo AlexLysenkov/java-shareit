@@ -3,6 +3,7 @@ package ru.practicum.shareit.user.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exception.ObjectNotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
@@ -36,12 +37,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getUserDtoById(Long id) {
+        checkUserExistsById(id);
         log.info("User с id: {} получен", id);
         return UserMapper.userToDto(userStorage.getUserById(id));
     }
 
     @Override
     public void deleteUserDtoById(Long id) {
+        checkUserExistsById(id);
         userStorage.deleteUserById(id);
         log.info("User с id: {} удален", id);
     }
@@ -52,13 +55,10 @@ public class UserServiceImpl implements UserService {
         return UserMapper.listUsersToListDto(userStorage.getAllUsers());
     }
 
-    @Override
-    public User getOwnerById(Long ownerId) {
-        return userStorage.getUserById(ownerId);
-    }
-
-    @Override
-    public void checkUserExistsById(Long id) {
-        userStorage.checkUser(id);
+    private void checkUserExistsById(Long id) {
+        boolean userExistsById = userStorage.existsById(id);
+        if (!userExistsById) {
+            throw new ObjectNotFoundException(String.format("User с id: %d не найден", id));
+        }
     }
 }

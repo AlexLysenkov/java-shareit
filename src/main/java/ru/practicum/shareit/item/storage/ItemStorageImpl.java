@@ -1,11 +1,9 @@
 package ru.practicum.shareit.item.storage;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.ObjectNotFoundException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.service.UserService;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -14,17 +12,9 @@ import java.util.stream.Collectors;
 public class ItemStorageImpl implements ItemStorage {
     private final Map<Long, Item> items = new HashMap<>();
     private Long id = 1L;
-    private final UserService userService;
-
-    @Autowired
-    public ItemStorageImpl(UserService userService) {
-        this.userService = userService;
-    }
 
     @Override
-    public Item createItem(Item item, Long userId) {
-        userService.checkUserExistsById(userId);
-        User owner = userService.getOwnerById(userId);
+    public Item createItem(Item item, User owner) {
         item.setId(id++);
         item.setOwner(owner);
         items.put(item.getId(), item);
@@ -34,7 +24,6 @@ public class ItemStorageImpl implements ItemStorage {
     @Override
     public Item updateItem(Long id, Item item, Long userId) {
         checkItem(id);
-        userService.checkUserExistsById(userId);
         checkItemOwner(id, userId);
         Item oldItem = items.get(id);
         Optional.ofNullable(item.getName()).ifPresent(oldItem::setName);
@@ -47,13 +36,11 @@ public class ItemStorageImpl implements ItemStorage {
     @Override
     public Item getItemById(Long itemId, Long userId) {
         checkItem(itemId);
-        userService.checkUserExistsById(userId);
         return items.get(itemId);
     }
 
     @Override
     public List<Item> getAllUserItems(Long userId) {
-        userService.checkUserExistsById(userId);
         return items.values()
                 .stream()
                 .filter(item -> Objects.equals(item.getOwner().getId(), userId))
