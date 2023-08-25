@@ -29,7 +29,7 @@ public class ErrorHandler {
         );
     }
 
-    @ExceptionHandler()
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         log.warn("Некорректные данные от пользователя 400 {}", e.getMessage(), e);
@@ -45,5 +45,12 @@ public class ErrorHandler {
         return new ErrorResponse(
                 e.getMessage()
         );
+    }
+
+    @ExceptionHandler()
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleBadRequestException(BadRequestException e) {
+        log.warn("Некорректный запрос {}", e.getMessage(), e);
+        return new ErrorResponse(e.getMessage());
     }
 }

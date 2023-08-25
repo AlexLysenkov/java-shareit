@@ -2,6 +2,7 @@ package ru.practicum.shareit.item.mapper;
 
 import lombok.experimental.UtilityClass;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemResponseDto;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.Collection;
@@ -38,5 +39,17 @@ public class ItemMapper {
 
     public List<ItemDto> listItemsToListDto(Collection<Item> items) {
         return items.stream().map(ItemMapper::itemToDto).collect(Collectors.toList());
+    }
+
+    public static ItemResponseDto toResponseItem(Item item) {
+        if (item == null) {
+            throw new IllegalArgumentException("Item не может быть null");
+        }
+        return ItemResponseDto.builder()
+                .id(item.getId())
+                .available(item.getAvailable())
+                .description(item.getDescription())
+                .name(item.getName())
+                .build();
     }
 }
