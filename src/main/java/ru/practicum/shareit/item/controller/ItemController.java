@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.service.ItemService;
@@ -18,6 +19,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping("/items")
+@Validated
 public class ItemController {
     private final ItemService itemService;
 
@@ -27,19 +29,19 @@ public class ItemController {
     }
 
     @PostMapping
-    public ResponseEntity<ItemDto> createItem(@Valid @RequestBody ItemDto itemDto,
-                                              @RequestHeader("X-Sharer-User-Id") Long userId) {
+    public ResponseEntity<ItemRequestDto> createItem(@Valid @RequestBody ItemRequestDto itemRequestDto,
+                                                     @RequestHeader("X-Sharer-User-Id") Long userId) {
         log.info("Получен POST запрос по эндпоинту '/items' от user c id {} на добавление item {}", userId,
-                itemDto);
-        return new ResponseEntity<>(itemService.createItemDto(itemDto, userId), HttpStatus.CREATED);
+                itemRequestDto);
+        return new ResponseEntity<>(itemService.createItemDto(itemRequestDto, userId), HttpStatus.CREATED);
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<ItemDto> updateItem(@PathVariable Long id, @RequestBody ItemDto itemDto,
-                                              @RequestHeader("X-Sharer-User-Id") Long userId) {
+    public ResponseEntity<ItemRequestDto> updateItem(@PathVariable Long id, @RequestBody ItemRequestDto itemRequestDto,
+                                                     @RequestHeader("X-Sharer-User-Id") Long userId) {
         log.info("Получен PATCH запрос по эндпоинту '/items/{}' от user c id {} на обновление данных item с id {}",
                 id, userId, id);
-        return new ResponseEntity<>(itemService.updateItemDto(id, itemDto, userId), HttpStatus.OK);
+        return new ResponseEntity<>(itemService.updateItemDto(id, itemRequestDto, userId), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
@@ -58,8 +60,8 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<ItemDto>> searchItems(@RequestParam("text") String text,
-                                                     @RequestHeader("X-Sharer-User-Id") Long userId) {
+    public ResponseEntity<List<ItemRequestDto>> searchItems(@RequestParam("text") String text,
+                                                            @RequestHeader("X-Sharer-User-Id") Long userId) {
         log.info("Получен GET запрос по эндпоинту '/items/search' от user c id {} на получение списка item " +
                 "по запросу {}", userId, text);
         return new ResponseEntity<>(itemService.searchItemsDto(text, userId), HttpStatus.OK);

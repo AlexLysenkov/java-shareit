@@ -1,7 +1,6 @@
 package ru.practicum.shareit.item.mapper;
 
 import lombok.experimental.UtilityClass;
-import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.CommentRequestDto;
 import ru.practicum.shareit.item.dto.CommentResponseDto;
 import ru.practicum.shareit.item.model.Comment;
@@ -15,17 +14,6 @@ import java.util.stream.Collectors;
 
 @UtilityClass
 public class CommentMapper {
-    public CommentDto commentToDto(Comment comment) {
-        if (comment == null) {
-            throw new IllegalArgumentException("Comment не может быть null.");
-        }
-        return CommentDto.builder()
-                .id(comment.getId())
-                .text(comment.getText())
-                .author(comment.getAuthor())
-                .build();
-    }
-
     public CommentResponseDto toResponseDto(Comment comment) {
         if (comment == null) {
             throw new IllegalArgumentException("Comment не может быть null.");
@@ -45,10 +33,6 @@ public class CommentMapper {
         comment.setItem(item);
         comment.setCreated(createdTime);
         return comment;
-    }
-
-    public List<CommentDto> listCommentsToListDto(Collection<Comment> comments) {
-        return comments.stream().map(CommentMapper::commentToDto).collect(Collectors.toList());
     }
 
     public List<CommentResponseDto> listCommentsToListResponse(Collection<Comment> comments) {
