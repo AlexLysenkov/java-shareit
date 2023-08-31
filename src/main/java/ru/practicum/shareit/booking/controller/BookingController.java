@@ -4,12 +4,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
 import ru.practicum.shareit.booking.service.BookingService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 /**
@@ -19,6 +22,7 @@ import java.util.List;
 @RestController
 @RequestMapping(path = "/bookings")
 @RequiredArgsConstructor
+@Validated
 public class BookingController {
     private final BookingService bookingService;
 
@@ -51,18 +55,22 @@ public class BookingController {
     @GetMapping
     public ResponseEntity<List<BookingResponseDto>> getAllBookingsByUserId(
             @RequestHeader("X-Sharer-User-Id") Long userId,
-            @RequestParam(required = false, defaultValue = "ALL") String state) {
+            @RequestParam(required = false, defaultValue = "ALL") String state,
+            @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
+            @RequestParam(defaultValue = "10") @Positive Integer size) {
         log.info("Получен GET запрос по эндпоинту '/bookings' от user c id {} " +
                 "на получение списка всех booking этого user", userId);
-        return new ResponseEntity<>(bookingService.getAllBookingsByUserId(userId, state), HttpStatus.OK);
+        return new ResponseEntity<>(bookingService.getAllBookingsByUserId(userId, state, from, size), HttpStatus.OK);
     }
 
     @GetMapping("/owner")
     public ResponseEntity<List<BookingResponseDto>> getAllBookingsByOwnerId(
             @RequestHeader("X-Sharer-User-Id") Long ownerId,
-            @RequestParam(required = false, defaultValue = "ALL") String state) {
+            @RequestParam(required = false, defaultValue = "ALL") String state,
+            @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
+            @RequestParam(defaultValue = "10") @Positive Integer size) {
         log.info("Получен GET запрос по эндпоинту '/bookings/owner' от user c id {} на получение списка booking всех "
                 + "items для которых он owner", ownerId);
-        return new ResponseEntity<>(bookingService.getAllBookingsByOwnerId(ownerId, state), HttpStatus.OK);
+        return new ResponseEntity<>(bookingService.getAllBookingsByOwnerId(ownerId, state, from, size), HttpStatus.OK);
     }
 }

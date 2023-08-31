@@ -29,39 +29,39 @@ public class ItemController {
     }
 
     @PostMapping
-    public ResponseEntity<ItemRequestDto> createItem(@Valid @RequestBody ItemRequestDto itemRequestDto,
-                                                     @RequestHeader("X-Sharer-User-Id") Long userId) {
+    public ResponseEntity<ItemResponseDto> createItem(@Valid @RequestBody ItemRequestDto itemRequestDto,
+                                                      @RequestHeader("X-Sharer-User-Id") Long userId) {
         log.info("Получен POST запрос по эндпоинту '/items' от user c id {} на добавление item {}", userId,
                 itemRequestDto);
         return new ResponseEntity<>(itemService.createItemDto(itemRequestDto, userId), HttpStatus.CREATED);
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<ItemRequestDto> updateItem(@PathVariable Long id, @RequestBody ItemRequestDto itemRequestDto,
-                                                     @RequestHeader("X-Sharer-User-Id") Long userId) {
+    public ResponseEntity<ItemResponseDto> updateItem(@PathVariable Long id, @RequestBody ItemRequestDto itemRequestDto,
+                                                      @RequestHeader("X-Sharer-User-Id") Long userId) {
         log.info("Получен PATCH запрос по эндпоинту '/items/{}' от user c id {} на обновление данных item с id {}",
                 id, userId, id);
         return new ResponseEntity<>(itemService.updateItemDto(id, itemRequestDto, userId), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ItemResponseDto> getItemById(@PathVariable @Positive Long id,
-                                                       @RequestHeader("X-Sharer-User-Id") Long userId) {
+    public ResponseEntity<ItemFullResponseDto> getItemById(@PathVariable @Positive Long id,
+                                                           @RequestHeader("X-Sharer-User-Id") Long userId) {
         log.info("Получен GET запрос по эндпоинту '/items/{}' от user c id {} на получение item с id {}", id,
                 userId, id);
         return new ResponseEntity<>(itemService.getItemDtoById(id, userId), HttpStatus.OK);
     }
 
     @GetMapping
-    public ResponseEntity<List<ItemResponseDto>> getAllUserItems(@RequestHeader("X-Sharer-User-Id") Long userId) {
+    public ResponseEntity<List<ItemFullResponseDto>> getAllUserItems(@RequestHeader("X-Sharer-User-Id") Long userId) {
         log.info("Получен GET запрос по эндпоинту '/items' от user c id {} на получение всех items",
                 userId);
         return new ResponseEntity<>(itemService.getAllUserItemsDto(userId), HttpStatus.OK);
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<ItemRequestDto>> searchItems(@RequestParam("text") String text,
-                                                            @RequestHeader("X-Sharer-User-Id") Long userId) {
+    public ResponseEntity<List<ItemResponseDto>> searchItems(@RequestParam("text") String text,
+                                                             @RequestHeader("X-Sharer-User-Id") Long userId) {
         log.info("Получен GET запрос по эндпоинту '/items/search' от user c id {} на получение списка item " +
                 "по запросу {}", userId, text);
         return new ResponseEntity<>(itemService.searchItemsDto(text, userId), HttpStatus.OK);
