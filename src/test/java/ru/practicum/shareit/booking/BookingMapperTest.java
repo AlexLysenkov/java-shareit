@@ -55,7 +55,6 @@ public class BookingMapperTest {
                 .build();
 
         bookingResponseDto = BookingMapper.toBookingResponseDto(booking);
-        bookingShort = BookingMapper.bookingToDtoId(booking);
     }
 
     @Test
@@ -71,6 +70,7 @@ public class BookingMapperTest {
 
     @Test
     void testBookingToDto() {
+        bookingShort = BookingMapper.bookingToDtoId(booking);
         assertNotNull(booking);
         assertEquals(booking.getId(), bookingShort.getId());
         assertEquals(booking.getBooker().getId(), bookingShort.getBookerId());

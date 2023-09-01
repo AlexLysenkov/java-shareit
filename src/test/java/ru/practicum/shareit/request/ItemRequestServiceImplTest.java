@@ -84,6 +84,14 @@ public class ItemRequestServiceImplTest {
     }
 
     @Test
+    void testGetItemRequestUserNotFound() {
+        itemRequestService.createItemRequest(itemRequestInfoDto, 1L);
+        ObjectNotFoundException exception = assertThrows(ObjectNotFoundException.class, () ->
+                itemRequestService.getItemRequestById(1L, 5L));
+        assertThat(exception.getMessage(), equalTo("User с id: 5 не найден"));
+    }
+
+    @Test
     void testGetAllItemRequests() {
         UserDto userDto = new UserDto(2L, "User", "user@email.ru");
         ItemRequestInfoDto itemRequestInfoDto1 = new ItemRequestInfoDto(2L, "text", LocalDateTime.now());
@@ -100,5 +108,12 @@ public class ItemRequestServiceImplTest {
         List<ItemRequestDtoResponse> itemRequests = itemRequestService.getItemRequestsByRequesterId(1L);
         assertThat(itemRequests.size(), equalTo(1));
         assertThat(itemRequests.get(0).getId(), equalTo(1L));
+    }
+
+    @Test
+    void testGetItemRequestsUserNotFound() {
+        ObjectNotFoundException exception = assertThrows(ObjectNotFoundException.class, () ->
+                itemRequestService.getItemRequestsByRequesterId(7L));
+        assertThat(exception.getMessage(), equalTo("User с id: 7 не найден"));
     }
 }
