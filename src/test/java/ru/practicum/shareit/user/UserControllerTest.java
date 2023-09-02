@@ -21,6 +21,7 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -71,6 +72,18 @@ public class UserControllerTest {
     }
 
     @Test
+    void testCreateUserStatus400() throws Exception {
+        UserDto userDto2 = new UserDto(5L, "Person", "incorrectEmail$gmail.com");
+        mvc.perform(post("/users")
+                        .content(objectMapper.writeValueAsString(userDto2))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+        verifyNoInteractions(userService);
+    }
+
+    @Test
     void testUpdateUser() throws Exception {
         userDto.setName("John");
         Mockito
@@ -84,6 +97,20 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.id", is(userDto.getId()), Long.class))
                 .andExpect(jsonPath("$.name", is(userDto.getName())))
                 .andExpect(jsonPath("$.email", is(userDto.getEmail())));
+    }
+
+    @Test
+    void testUpdateUserStatus400() throws Exception {
+        userDto.setEmail("incorrectEmail$gmail.com");
+        Mockito
+                .when(userService.updateUserDto(Mockito.any(), Mockito.any())).thenReturn(userDto);
+        mvc.perform(patch("/users/{id}", 1L)
+                        .content(objectMapper.writeValueAsString(userDto))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+        verifyNoInteractions(userService);
     }
 
     @Test

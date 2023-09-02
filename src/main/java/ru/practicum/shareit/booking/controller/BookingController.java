@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
@@ -15,11 +16,10 @@ import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
-/**
- * TODO Sprint add-bookings.
- */
+import static ru.practicum.shareit.utils.Constants.HEADER;
+
 @Slf4j
-@RestController
+@Controller
 @RequestMapping(path = "/bookings")
 @RequiredArgsConstructor
 @Validated
@@ -28,49 +28,49 @@ public class BookingController {
 
     @PostMapping
     public ResponseEntity<BookingResponseDto> createBooking(@Valid @RequestBody BookingRequestDto bookingRequestDto,
-                                                            @RequestHeader("X-Sharer-User-Id") Long userId) {
+                                                            @RequestHeader(HEADER) Long userId) {
         log.info("Получен POST запрос по эндпоинту '/bookings' от user с id {} на добавление bookings {}",
                 userId, bookingRequestDto);
         return new ResponseEntity<>(bookingService.createBooking(bookingRequestDto, userId), HttpStatus.CREATED);
     }
 
     @PatchMapping("/{bookingId}")
-    public ResponseEntity<BookingResponseDto> updateBooking(@RequestHeader("X-Sharer-User-Id") Long userId,
+    public ResponseEntity<BookingResponseDto> updateBooking(@RequestHeader(HEADER) Long userId,
                                                             @PathVariable Long bookingId,
                                                             @RequestParam("approved") Boolean approved) {
         log.info("Получен PATCH запрос по эндпоинту '/bookings/{}' от user c id {} статус подтверждения "
                         + "(approved: {}) booking с id {}",
                 bookingId, userId, approved, bookingId);
-        return new ResponseEntity<>(bookingService.updateBooking(userId, bookingId, approved), HttpStatus.OK);
+        return ResponseEntity.ok(bookingService.updateBooking(userId, bookingId, approved));
     }
 
     @GetMapping("/{bookingId}")
     public ResponseEntity<BookingResponseDto> getBookingById(@PathVariable Long bookingId,
-                                                             @RequestHeader("X-Sharer-User-Id") Long userId) {
+                                                             @RequestHeader(HEADER) Long userId) {
         log.info("Получен GET запрос по эндпоинту '/bookings/{}' от user c id {} на получение booking с id {}",
                 bookingId, userId, bookingId);
-        return new ResponseEntity<>(bookingService.getBookingById(userId, bookingId), HttpStatus.OK);
+        return ResponseEntity.ok(bookingService.getBookingById(userId, bookingId));
     }
 
     @GetMapping
     public ResponseEntity<List<BookingResponseDto>> getAllBookingsByUserId(
-            @RequestHeader("X-Sharer-User-Id") Long userId,
-            @RequestParam(required = false, defaultValue = "ALL") String state,
+            @RequestHeader(HEADER) Long userId,
+            @RequestParam(defaultValue = "ALL") String state,
             @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
             @RequestParam(defaultValue = "10") @Positive Integer size) {
         log.info("Получен GET запрос по эндпоинту '/bookings' от user c id {} " +
                 "на получение списка всех booking этого user", userId);
-        return new ResponseEntity<>(bookingService.getAllBookingsByUserId(userId, state, from, size), HttpStatus.OK);
+        return ResponseEntity.ok(bookingService.getAllBookingsByUserId(userId, state, from, size));
     }
 
     @GetMapping("/owner")
     public ResponseEntity<List<BookingResponseDto>> getAllBookingsByOwnerId(
-            @RequestHeader("X-Sharer-User-Id") Long ownerId,
-            @RequestParam(required = false, defaultValue = "ALL") String state,
+            @RequestHeader(HEADER) Long ownerId,
+            @RequestParam(defaultValue = "ALL") String state,
             @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
             @RequestParam(defaultValue = "10") @Positive Integer size) {
         log.info("Получен GET запрос по эндпоинту '/bookings/owner' от user c id {} на получение списка booking всех "
                 + "items для которых он owner", ownerId);
-        return new ResponseEntity<>(bookingService.getAllBookingsByOwnerId(ownerId, state, from, size), HttpStatus.OK);
+        return ResponseEntity.ok(bookingService.getAllBookingsByOwnerId(ownerId, state, from, size));
     }
 }

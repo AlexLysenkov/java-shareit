@@ -15,6 +15,7 @@ import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.item.dto.ItemShortResponseDto;
 import ru.practicum.shareit.user.dto.UserDto;
 
@@ -22,9 +23,12 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static ru.practicum.shareit.utils.Constants.HEADER;
 
 @WebMvcTest(controllers = BookingController.class)
 @AutoConfigureMockMvc
@@ -75,10 +79,24 @@ public class BookingControllerTest {
                         .content(objectMapper.writeValueAsString(bookingRequestDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .accept(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", "1")
+                        .header(HEADER, "1")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
                 .andExpect(content().json(objectMapper.writeValueAsString(bookingResponseDto)));
+    }
+
+    @Test
+    void testCreateBookingStatus400() throws Exception {
+        BookingRequestDto booking = new BookingRequestDto(
+                null, LocalDateTime.now(), LocalDateTime.now().plusDays(1));
+        mvc.perform(post("/bookings")
+                        .content(objectMapper.writeValueAsString(booking))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .header(HEADER, "1")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+        verifyNoInteractions(bookingService);
     }
 
     @Test
@@ -90,10 +108,25 @@ public class BookingControllerTest {
                         .content(objectMapper.writeValueAsString(bookingRequestDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .accept(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", "1")
+                        .header(HEADER, "1")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(bookingResponseDto)));
+    }
+
+    @Test
+    void testUpdateBookingStatus400() throws Exception {
+        Mockito
+                .when(bookingService.updateBooking(Mockito.anyLong(), Mockito.anyLong(), Mockito.anyBoolean()))
+                .thenThrow(new BadRequestException("Validation error 400"));
+        mvc.perform(patch("/bookings/{bookingId}?approved=true", 1L)
+                        .content(objectMapper.writeValueAsString(bookingRequestDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .header(HEADER, "1")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error", is("Validation error 400")));
     }
 
     @Test
@@ -102,7 +135,7 @@ public class BookingControllerTest {
                 .when(bookingService.getBookingById(Mockito.anyLong(), Mockito.anyLong()))
                 .thenReturn(bookingResponseDto);
         mvc.perform(get("/bookings/{bookingId}", 1L)
-                        .header("X-Sharer-User-Id", "1"))
+                        .header(HEADER, "1"))
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(bookingResponseDto)));
     }
@@ -113,7 +146,7 @@ public class BookingControllerTest {
                 .when(bookingService.getAllBookingsByUserId(Mockito.anyLong(), Mockito.anyString(), Mockito.anyInt(),
                         Mockito.anyInt())).thenReturn(List.of(bookingResponseDto));
         mvc.perform(get("/bookings")
-                        .header("X-Sharer-User-Id", "1"))
+                        .header(HEADER, "1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(bookingResponseDto.getId()))
                 .andExpect(jsonPath("$[0].status").value(bookingResponseDto.getStatus().toString()))
@@ -128,7 +161,7 @@ public class BookingControllerTest {
                 .when(bookingService.getAllBookingsByOwnerId(Mockito.anyLong(), Mockito.anyString(),
                         Mockito.anyInt(), Mockito.anyInt())).thenReturn(List.of(bookingResponseDto));
         mvc.perform(get("/bookings/owner")
-                        .header("X-Sharer-User-Id", "1"))
+                        .header(HEADER, "1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(bookingResponseDto.getId()))
                 .andExpect(jsonPath("$[0].status").value(bookingResponseDto.getStatus().toString()))

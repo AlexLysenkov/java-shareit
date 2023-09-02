@@ -32,10 +32,14 @@ public class ItemRequestServiceImplTest {
     private final EntityManager em;
     private final ItemRequestService itemRequestService;
     private ItemRequestInfoDto itemRequestInfoDto;
+    private ItemRequestDtoResponse itemRequestDto;
     private final UserService userService;
 
     @BeforeEach
     void setUp() {
+        itemRequestInfoDto = ItemRequestInfoDto.builder()
+                .description("Description")
+                .build();
         UserDto userDto = UserDto.builder()
                 .id(1L)
                 .name("Name")
@@ -43,7 +47,7 @@ public class ItemRequestServiceImplTest {
                 .build();
         userService.createUserDto(userDto);
 
-        itemRequestInfoDto = ItemRequestInfoDto.builder()
+        itemRequestDto = ItemRequestDtoResponse.builder()
                 .id(1L)
                 .description("Description")
                 .created(LocalDateTime.now())
@@ -55,9 +59,9 @@ public class ItemRequestServiceImplTest {
         itemRequestService.createItemRequest(itemRequestInfoDto, 1L);
         TypedQuery<ItemRequest> query = em.createQuery(
                 "SELECT i FROM ItemRequest i WHERE i.id = :id", ItemRequest.class);
-        ItemRequest itemRequest = query.setParameter("id", itemRequestInfoDto.getId()).getSingleResult();
+        ItemRequest itemRequest = query.setParameter("id", itemRequestDto.getId()).getSingleResult();
         assertThat(itemRequest.getId(), equalTo(1L));
-        assertThat(itemRequest.getDescription(), equalTo(itemRequestInfoDto.getDescription()));
+        assertThat(itemRequest.getDescription(), equalTo(itemRequestDto.getDescription()));
     }
 
     @Test
@@ -94,7 +98,7 @@ public class ItemRequestServiceImplTest {
     @Test
     void testGetAllItemRequests() {
         UserDto userDto = new UserDto(2L, "User", "user@email.ru");
-        ItemRequestInfoDto itemRequestInfoDto1 = new ItemRequestInfoDto(2L, "text", LocalDateTime.now());
+        ItemRequestInfoDto itemRequestInfoDto1 = new ItemRequestInfoDto("text");
         userService.createUserDto(userDto);
         itemRequestService.createItemRequest(itemRequestInfoDto1, 2L);
         List<ItemRequestDtoResponse> itemRequests = itemRequestService.getAllItemRequests(0, 2, 1L);

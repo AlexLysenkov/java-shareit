@@ -115,7 +115,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemResponseDto> searchItemsDto(String text, Long userId) {
         checkUserExistsById(userId);
-        if (text == null || text.isBlank()) {
+        if (text.isBlank()) {
             log.info("По запросу User ID {}, получен пустой лист", userId);
             return Collections.emptyList();
         }

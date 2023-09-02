@@ -3,19 +3,15 @@ package ru.practicum.shareit.request.dto;
 import lombok.*;
 
 import javax.validation.constraints.NotBlank;
-import java.time.LocalDateTime;
+import javax.validation.constraints.Size;
 
-/**
- * TODO Sprint add-item-requests.
- */
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class ItemRequestInfoDto {
-    private Long id;
     @NotBlank
+    @Size(max = 500)
     private String description;
-    private LocalDateTime created;
 }

@@ -17,9 +17,11 @@ import ru.practicum.shareit.item.service.ItemService;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static ru.practicum.shareit.utils.Constants.HEADER;
 
 @WebMvcTest(controllers = ItemController.class)
 @AutoConfigureMockMvc
@@ -55,11 +57,24 @@ public class ItemControllerTest {
                         .content(objectMapper.writeValueAsString(itemRequestDto))
                         .contentType(MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8)
-                        .header("X-Sharer-User-Id", 1L)
+                        .header(HEADER, 1L)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
                 .andDo(print());
         Mockito.verify(itemService).createItemDto(itemRequestDto, 1L);
+    }
+
+    @Test
+    void testCreateItemStatus400() throws Exception {
+        ItemRequestDto item = new ItemRequestDto(5L, null, "desc", true, 1L);
+        mvc.perform(post("/items")
+                        .content(objectMapper.writeValueAsString(item))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .header(HEADER, 1L)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+        verifyNoInteractions(itemService);
     }
 
     @Test
@@ -72,10 +87,24 @@ public class ItemControllerTest {
                         .characterEncoding(StandardCharsets.UTF_8)
                         .content(objectMapper.writeValueAsString(itemRequestDto))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", 1L)
+                        .header(HEADER, 1L)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print());
+    }
+
+    @Test
+    void testUpdateItem400() throws Exception {
+        String desc = new String(new char[501]);
+        itemRequestDto.setDescription(desc);
+        mvc.perform(patch("/items/{id}", 1L)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .content(objectMapper.writeValueAsString(itemRequestDto))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header(HEADER, 1L)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+        verifyNoInteractions(itemService);
     }
 
     @Test
@@ -87,7 +116,7 @@ public class ItemControllerTest {
                         .content(objectMapper.writeValueAsBytes(itemRequestDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", 1L)
+                        .header(HEADER, 1L)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print());
@@ -102,7 +131,7 @@ public class ItemControllerTest {
                         .content(objectMapper.writeValueAsString(itemRequestDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", 1L)
+                        .header(HEADER, 1L)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print());
@@ -116,7 +145,7 @@ public class ItemControllerTest {
                 .when(itemService.searchItemsDto(Mockito.anyString(), Mockito.anyLong())).thenReturn(new ArrayList<>());
         mvc.perform(get("/items/search?text=text")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", 1L)
+                        .header(HEADER, 1L)
                         .characterEncoding(StandardCharsets.UTF_8)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -135,9 +164,23 @@ public class ItemControllerTest {
                         .content(objectMapper.writeValueAsString(commentRequestDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", 1L)
+                        .header(HEADER, 1L)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print());
+    }
+
+    @Test
+    void testCreateCommentStatus400() throws Exception {
+        String desc = new String(new char[501]);
+        CommentRequestDto comment = new CommentRequestDto(desc);
+        mvc.perform(post("/items/{itemId}/comment", 1L)
+                        .content(objectMapper.writeValueAsString(comment))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header(HEADER, 1L)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+        verifyNoInteractions(itemService);
     }
 }

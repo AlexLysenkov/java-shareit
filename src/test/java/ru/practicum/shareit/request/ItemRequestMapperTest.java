@@ -18,18 +18,22 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 public class ItemRequestMapperTest {
-    private ItemRequestInfoDto itemRequestInfoDto;
+    private ItemRequestDtoResponse itemRequestInfoDto;
+    private ItemRequestInfoDto itemRequestDto;
     private ItemRequest itemRequest;
 
     @BeforeEach
     void setUp() {
+        itemRequestDto = ItemRequestInfoDto.builder()
+                .description("text")
+                .build();
         itemRequest = ItemRequest.builder()
                 .id(1L)
                 .description("Description")
                 .created(LocalDateTime.now())
                 .requester(new User(1L, "Name", "some@email.ru"))
                 .build();
-        itemRequestInfoDto = ItemRequestInfoDto.builder()
+        itemRequestInfoDto = ItemRequestDtoResponse.builder()
                 .id(1L)
                 .description("Description")
                 .created(LocalDateTime.now())
@@ -47,11 +51,9 @@ public class ItemRequestMapperTest {
 
     @Test
     void testDtoToItemRequest() {
-        itemRequest = ItemRequestMapper.dtoToItemRequest(itemRequestInfoDto);
+        itemRequest = ItemRequestMapper.dtoToItemRequest(itemRequestDto);
         assertNotNull(itemRequest);
-        assertEquals(itemRequest.getId(), itemRequestInfoDto.getId());
-        assertEquals(itemRequest.getDescription(), itemRequestInfoDto.getDescription());
-        assertEquals(itemRequest.getCreated(), itemRequestInfoDto.getCreated());
+        assertEquals(itemRequest.getDescription(), itemRequestDto.getDescription());
     }
 
     @Test

@@ -20,11 +20,13 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static ru.practicum.shareit.utils.Constants.HEADER;
 
 ;
 
@@ -44,15 +46,13 @@ public class ItemRequestControllerTest {
     void setUp() {
         itemRequestDtoResponse = ItemRequestDtoResponse.builder()
                 .id(1L)
-                .description("text")
+                .description("Description")
                 .created(LocalDateTime.now())
                 .items(new ArrayList<>())
                 .build();
 
         itemRequestInfoDto = ItemRequestInfoDto.builder()
-                .id(1L)
                 .description("Description")
-                .created(LocalDateTime.now())
                 .build();
     }
 
@@ -60,16 +60,30 @@ public class ItemRequestControllerTest {
     void testCreateItemRequest() throws Exception {
         Mockito
                 .when(itemRequestService.createItemRequest(Mockito.any(), Mockito.anyLong()))
-                .thenReturn(itemRequestInfoDto);
+                .thenReturn(itemRequestDtoResponse);
         mvc.perform(post("/requests")
                         .content(objectMapper.writeValueAsString(itemRequestInfoDto))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", "1")
+                        .header(HEADER, "1")
                         .accept(MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id", is(itemRequestInfoDto.getId()), Long.class))
+                .andExpect(jsonPath("$.id", is(itemRequestDtoResponse.getId()), Long.class))
                 .andExpect(jsonPath("$.description", is(itemRequestInfoDto.getDescription())));
+    }
+
+    @Test
+    void testCreateItemRequestStatus400() throws Exception {
+        ItemRequestDtoResponse itemRequest = new ItemRequestDtoResponse(
+                3L, null, LocalDateTime.now(), null);
+        mvc.perform(post("/requests")
+                        .content(objectMapper.writeValueAsString(itemRequest))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header(HEADER, "1")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .characterEncoding(StandardCharsets.UTF_8))
+                .andExpect(status().isBadRequest());
+        verifyNoInteractions(itemRequestService);
     }
 
     @Test
@@ -77,7 +91,7 @@ public class ItemRequestControllerTest {
         Mockito
                 .when(itemRequestService.getItemRequestsByRequesterId(Mockito.anyLong())).thenReturn(new ArrayList<>());
         mvc.perform((get("/requests"))
-                        .header("X-Sharer-User-Id", "1"))
+                        .header(HEADER, "1"))
                 .andExpect(status().isOk())
                 .andDo(print());
     }
@@ -88,7 +102,7 @@ public class ItemRequestControllerTest {
                 .when(itemRequestService.getAllItemRequests(Mockito.anyInt(), Mockito.anyInt(), Mockito.anyLong()))
                 .thenReturn(new ArrayList<>());
         mvc.perform(get("/requests/all")
-                        .header("X-Sharer-User-Id", "1"))
+                        .header(HEADER, "1"))
                 .andExpect(status().isOk())
                 .andDo(print());
         Mockito.verify(itemRequestService).getAllItemRequests(0, 10, 1L);
@@ -100,7 +114,7 @@ public class ItemRequestControllerTest {
                 .when(itemRequestService.getItemRequestById(Mockito.anyLong(), Mockito.anyLong()))
                 .thenReturn(itemRequestDtoResponse);
         mvc.perform(get("/requests/{requestId}", 1L)
-                        .header("X-Sharer-User-Id", "1"))
+                        .header(HEADER, "1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(itemRequestDtoResponse.getId()), Long.class))
                 .andExpect(jsonPath("$.description", is(itemRequestDtoResponse.getDescription())));
