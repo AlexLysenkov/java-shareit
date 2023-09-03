@@ -39,7 +39,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional
-    public ItemRequestDto createItemDto(ItemRequestDto itemRequestDto, Long userId) {
+    public ItemResponseDto createItemDto(ItemRequestDto itemRequestDto, Long userId) {
         Item item = ItemMapper.dtoToItem(itemRequestDto);
         item.setOwner(userRepository.findById(userId).orElseThrow(() ->
                 new ObjectNotFoundException(String.format(USER_NOT_FOUND, userId))));
@@ -49,7 +49,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional
-    public ItemRequestDto updateItemDto(Long id, ItemRequestDto itemRequestDto, Long userId) {
+    public ItemResponseDto updateItemDto(Long id, ItemRequestDto itemRequestDto, Long userId) {
         checkUserExistsById(userId);
         checkItemOwner(id, userId);
         Item item = itemRepository.findById(id).orElseThrow(() ->
@@ -62,7 +62,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemResponseDto getItemDtoById(Long itemId, Long userId) {
+    public ItemFullResponseDto getItemDtoById(Long itemId, Long userId) {
         checkUserExistsById(userId);
         Item item = itemRepository.findById(itemId).orElseThrow(() ->
                 new ObjectNotFoundException(String.format(ITEM_NOT_FOUND, itemId)));
@@ -88,7 +88,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemResponseDto> getAllUserItemsDto(Long userId) {
+    public List<ItemFullResponseDto> getAllUserItemsDto(Long userId) {
         checkUserExistsById(userId);
         List<Item> items = itemRepository.findAllByOwnerId(userId);
         List<Long> itemIds = items.stream().map(Item::getId).collect(Collectors.toList());
@@ -104,18 +104,18 @@ public class ItemServiceImpl implements ItemService {
                 .findAllByItemIdIn(itemIds)
                 .stream()
                 .collect(Collectors.groupingBy(comment -> comment.getItem().getId()));
-        List<ItemResponseDto> itemResponseDtos = new ArrayList<>();
+        List<ItemFullResponseDto> itemFullResponseDtos = new ArrayList<>();
         for (Item item : items) {
-            itemResponseDtos.add(ItemMapper.toItemResponseDto(item, lastBookingMap.get(item.getId()),
+            itemFullResponseDtos.add(ItemMapper.toItemResponseDto(item, lastBookingMap.get(item.getId()),
                     nextBookingMap.get(item.getId()), commentMap.getOrDefault(item.getId(), Collections.emptyList())));
         }
-        return itemResponseDtos;
+        return itemFullResponseDtos;
     }
 
     @Override
-    public List<ItemRequestDto> searchItemsDto(String text, Long userId) {
+    public List<ItemResponseDto> searchItemsDto(String text, Long userId) {
         checkUserExistsById(userId);
-        if (text == null || text.isBlank()) {
+        if (text.isBlank()) {
             log.info("По запросу User ID {}, получен пустой лист", userId);
             return Collections.emptyList();
         }

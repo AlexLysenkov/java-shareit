@@ -2,6 +2,9 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
@@ -86,10 +89,11 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingResponseDto> getAllBookingsByUserId(Long userId, String status) {
+    public List<BookingResponseDto> getAllBookingsByUserId(Long userId, String status, Integer from, Integer size) {
         checkUserExistsById(userId);
         State state;
         List<Booking> bookings;
+        Pageable pageable = PageRequest.of(from / size, size, Sort.by("start").descending());
         try {
             state = State.valueOf(status);
         } catch (IllegalArgumentException e) {
@@ -97,34 +101,35 @@ public class BookingServiceImpl implements BookingService {
         }
         switch (state) {
             case ALL:
-                bookings = bookingRepository.findByBookerIdOrderByStartDesc(userId);
+                bookings = bookingRepository.findByBookerIdOrderByStartDesc(userId, pageable);
                 break;
             case PAST:
-                bookings = bookingRepository.findPastBookings(userId);
+                bookings = bookingRepository.findPastBookings(userId, pageable);
                 break;
             case CURRENT:
-                bookings = bookingRepository.findCurrentBookings(userId);
+                bookings = bookingRepository.findCurrentBookings(userId, pageable);
                 break;
             case FUTURE:
-                bookings = bookingRepository.findFutureBookings(userId);
+                bookings = bookingRepository.findFutureBookings(userId, pageable);
                 break;
             case WAITING:
-                bookings = bookingRepository.findByBookerIdAndStatusOrderById(userId, Status.WAITING);
+                bookings = bookingRepository.findByBookerIdAndStatusOrderById(userId, Status.WAITING, pageable);
                 break;
             case REJECTED:
-                bookings = bookingRepository.findByBookerIdAndStatusOrderById(userId, Status.REJECTED);
+                bookings = bookingRepository.findByBookerIdAndStatusOrderById(userId, Status.REJECTED, pageable);
                 break;
             default:
-                throw new BadRequestException("Передан неизвестный статус");
+                throw new BadRequestException(String.format("Передан неизвестный статус: %s", status));
         }
         return bookings.stream().map(BookingMapper::toBookingResponseDto).collect(Collectors.toList());
     }
 
     @Override
-    public List<BookingResponseDto> getAllBookingsByOwnerId(Long ownerId, String status) {
+    public List<BookingResponseDto> getAllBookingsByOwnerId(Long ownerId, String status, Integer from, Integer size) {
         checkUserExistsById(ownerId);
         State state;
         List<Booking> bookings;
+        Pageable pageable = PageRequest.of(from / size, size, Sort.by("start").descending());
         try {
             state = State.valueOf(status);
         } catch (IllegalArgumentException e) {
@@ -132,25 +137,25 @@ public class BookingServiceImpl implements BookingService {
         }
         switch (state) {
             case ALL:
-                bookings = bookingRepository.findByOwnerId(ownerId);
+                bookings = bookingRepository.findByOwnerId(ownerId, pageable);
                 break;
             case PAST:
-                bookings = bookingRepository.findPastOwners(ownerId, LocalDateTime.now());
+                bookings = bookingRepository.findPastOwners(ownerId, LocalDateTime.now(), pageable);
                 break;
             case CURRENT:
-                bookings = bookingRepository.findCurrentOwners(ownerId, LocalDateTime.now());
+                bookings = bookingRepository.findCurrentOwners(ownerId, LocalDateTime.now(), pageable);
                 break;
             case FUTURE:
-                bookings = bookingRepository.findFutureOwners(ownerId, LocalDateTime.now());
+                bookings = bookingRepository.findFutureOwners(ownerId, LocalDateTime.now(), pageable);
                 break;
             case WAITING:
-                bookings = bookingRepository.findOwnersAndStatusEquals(ownerId, Status.WAITING);
+                bookings = bookingRepository.findOwnersAndStatusEquals(ownerId, Status.WAITING, pageable);
                 break;
             case REJECTED:
-                bookings = bookingRepository.findOwnersAndStatusEquals(ownerId, Status.REJECTED);
+                bookings = bookingRepository.findOwnersAndStatusEquals(ownerId, Status.REJECTED, pageable);
                 break;
             default:
-                throw new BadRequestException("Передан неизвестный статус");
+                throw new BadRequestException(String.format("Передан неизвестный статус: %s", status));
         }
         return bookings.stream().map(BookingMapper::toBookingResponseDto).collect(Collectors.toList());
     }
