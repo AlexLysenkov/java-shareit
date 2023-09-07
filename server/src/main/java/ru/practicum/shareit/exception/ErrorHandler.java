@@ -31,15 +31,6 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-        log.warn("Некорректные данные от пользователя 400 {}", e.getMessage(), e);
-        return new ErrorResponse(
-                e.getMessage()
-        );
-    }
-
-    @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleThrowable(final Throwable e) {
         log.warn("Произошла непредвиденная ошибка 500 {}", e.getMessage(), e);
@@ -48,10 +39,10 @@ public class ErrorHandler {
         );
     }
 
-    @ExceptionHandler()
+    @ExceptionHandler({MethodArgumentNotValidException.class, BadRequestException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleBadRequestException(BadRequestException e) {
-        log.warn("Некорректный запрос {}", e.getMessage(), e);
+    public ErrorResponse handleException(Exception e) {
+        log.warn("Некорректный запрос 400 {}", e.getMessage(), e);
         return new ErrorResponse(e.getMessage());
     }
 }

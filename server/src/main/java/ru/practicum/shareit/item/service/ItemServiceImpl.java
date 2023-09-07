@@ -2,7 +2,6 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -21,6 +20,7 @@ import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
+import ru.practicum.shareit.utils.CustomPageRequest;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -92,7 +92,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemFullResponseDto> getAllUserItemsDto(Long userId, Integer from, Integer size) {
         checkUserExistsById(userId);
-        Pageable pageable = PageRequest.of(from / size, size, Sort.by("id"));
+        Pageable pageable = new CustomPageRequest(from / size, size, Sort.by("id"));
         List<Item> items = itemRepository.findAllByOwnerId(userId, pageable);
         List<Long> itemIds = items.stream().map(Item::getId).collect(Collectors.toList());
         List<Booking> lastBookings = bookingRepository.findFirstByItemIdInAndEndIsBeforeOrderByEndDesc(itemIds,
@@ -122,7 +122,7 @@ public class ItemServiceImpl implements ItemService {
             log.info("По запросу User ID {}, получен пустой лист", userId);
             return Collections.emptyList();
         }
-        Pageable pageable = PageRequest.of(from / size, size);
+        Pageable pageable = new CustomPageRequest(from / size, size);
         List<Item> items = itemRepository.getAvailableItemByText(text, pageable);
         log.info("Найдены все items по запросу {}", text);
         return ItemMapper.listItemsToListDto(items);

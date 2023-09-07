@@ -27,7 +27,7 @@ public class ErrorHandlerTest {
     @Test
     void testBadRequestException() {
         BadRequestException exception = new BadRequestException("Некорректный запрос");
-        ErrorResponse response = errorHandler.handleBadRequestException(exception);
+        ErrorResponse response = errorHandler.handleException(exception);
         assertEquals(exception.getMessage(), response.getError());
     }
 

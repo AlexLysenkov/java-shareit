@@ -2,7 +2,6 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -20,6 +19,7 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
+import ru.practicum.shareit.utils.CustomPageRequest;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -93,7 +93,7 @@ public class BookingServiceImpl implements BookingService {
         checkUserExistsById(userId);
         State state;
         List<Booking> bookings;
-        Pageable pageable = PageRequest.of(from / size, size, Sort.by("start").descending());
+        Pageable pageable = new CustomPageRequest(from / size, size, Sort.by("start").descending());
         try {
             state = State.valueOf(status);
         } catch (IllegalArgumentException e) {
@@ -129,7 +129,7 @@ public class BookingServiceImpl implements BookingService {
         checkUserExistsById(ownerId);
         State state;
         List<Booking> bookings;
-        Pageable pageable = PageRequest.of(from / size, size, Sort.by("start").descending());
+        Pageable pageable = new CustomPageRequest(from / size, size, Sort.by("start").descending());
         try {
             state = State.valueOf(status);
         } catch (IllegalArgumentException e) {

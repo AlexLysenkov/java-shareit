@@ -1,7 +1,7 @@
 package ru.practicum.shareit.item.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -16,13 +16,9 @@ import static ru.practicum.shareit.utils.Constants.HEADER;
 @Slf4j
 @Controller
 @RequestMapping("/items")
+@RequiredArgsConstructor
 public class ItemController {
     private final ItemService itemService;
-
-    @Autowired
-    public ItemController(ItemService itemService) {
-        this.itemService = itemService;
-    }
 
     @PostMapping
     public ResponseEntity<ItemResponseDto> createItem(@RequestBody ItemRequestDto itemRequestDto,
